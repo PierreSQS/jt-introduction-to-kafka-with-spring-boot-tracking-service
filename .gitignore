@@ -1,6 +1,5 @@
 HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -33,7 +32,6 @@ build/
 .vscode/
 
 .java-version
-.mvn/
 .gradle/
 gradle/
 gradlew
