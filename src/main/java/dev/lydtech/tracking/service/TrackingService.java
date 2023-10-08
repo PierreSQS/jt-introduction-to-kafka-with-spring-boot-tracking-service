@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutionException;
+
 @Service
 @RequiredArgsConstructor
 public class TrackingService {
@@ -15,7 +17,7 @@ public class TrackingService {
 
     private final KafkaTemplate<String,Object> kafkaTemplate;
 
-    public void process(DispatchPreparing dispatchPreparing) {
+    public void process(DispatchPreparing dispatchPreparing) throws ExecutionException, InterruptedException {
         TrackingStatusUpdated trackingStatusUpdated =
                 TrackingStatusUpdated
                         .builder()
@@ -23,7 +25,7 @@ public class TrackingService {
                         .status(Status.PREPARING)
                         .build();
 
-        kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated);
+        kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated).get();
 
     }
 

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -24,7 +25,7 @@ class DispatchTrackingHandlerTest {
     }
 
     @Test
-    void listen() {
+    void listen() throws ExecutionException, InterruptedException {
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
         dispatchTrackingHandler.listen(dispatchPreparing);
         verify(trackingServMock).process(dispatchPreparing);
