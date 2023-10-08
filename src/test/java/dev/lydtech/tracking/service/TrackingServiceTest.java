@@ -1,6 +1,7 @@
 package dev.lydtech.tracking.service;
 
 import dev.lydtech.dispatch.message.DispatchPreparing;
+import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import dev.lydtech.tracking.util.TestEventData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -28,7 +29,7 @@ class TrackingServiceTest {
 
     @Test
     void process_Success() throws ExecutionException, InterruptedException {
-        given(kafkaTemplateMock.send(anyString(),any(DispatchPreparing.class))).willReturn(mock());
+        given(kafkaTemplateMock.send(anyString(),any(TrackingStatusUpdated.class))).willReturn(mock());
 
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
 
