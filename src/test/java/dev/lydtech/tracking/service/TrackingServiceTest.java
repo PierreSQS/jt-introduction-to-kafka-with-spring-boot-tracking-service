@@ -5,7 +5,6 @@ import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import dev.lydtech.tracking.util.TestEventData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.Times;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.UUID;
@@ -65,6 +64,6 @@ class TrackingServiceTest {
                 .withMessage(TRACKING_PROCESS_FAILURE);
 
         // Verify 2 Calls because of the calls above
-        verify(kafkaTemplateMock, new Times(2)).send(eq(TrackingService.TRACKING_STATUS_TOPIC),any());
+        verify(kafkaTemplateMock, times(2)).send(eq(TrackingService.TRACKING_STATUS_TOPIC),any());
     }
 }

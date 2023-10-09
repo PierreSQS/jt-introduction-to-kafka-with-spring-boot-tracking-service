@@ -27,6 +27,9 @@ public class DispatchTrackingHandler {
             trackingService.process(payload);
         } catch (Exception e) {
             log.error("Tracking Process failure: ",e);
+            /* Clean up whatever needs to be handled before interrupting  */
+            Thread.currentThread().interrupt();
+
         }
     }
 }
