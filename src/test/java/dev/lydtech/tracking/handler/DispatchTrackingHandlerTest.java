@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class DispatchTrackingHandlerTest {
 
@@ -25,8 +24,20 @@ class DispatchTrackingHandlerTest {
     }
 
     @Test
-    void listen() throws ExecutionException, InterruptedException {
+    void listen_success() throws ExecutionException, InterruptedException {
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
+        dispatchTrackingHandler.listen(dispatchPreparing);
+        verify(trackingServMock).process(dispatchPreparing);
+    }
+    @Test
+    void listen_throwsException() throws ExecutionException, InterruptedException {
+        // Given
+        DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
+
+        // When
+        doThrow(RuntimeException.class).when(trackingServMock).process(any(DispatchPreparing.class));
+
+        // Then
         dispatchTrackingHandler.listen(dispatchPreparing);
         verify(trackingServMock).process(dispatchPreparing);
     }
