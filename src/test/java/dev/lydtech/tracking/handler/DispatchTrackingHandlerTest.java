@@ -17,23 +17,22 @@ class DispatchTrackingHandlerTest {
 
     DispatchTrackingHandler dispatchTrackingHandler;
 
+    DispatchPreparing dispatchPreparing;
+
     @BeforeEach
     void setUp() {
         trackingServMock = mock();
         dispatchTrackingHandler = new DispatchTrackingHandler(trackingServMock);
+        dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
     }
 
     @Test
     void listen_success() throws ExecutionException, InterruptedException {
-        DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
         dispatchTrackingHandler.listen(dispatchPreparing);
         verify(trackingServMock).process(dispatchPreparing);
     }
     @Test
     void listen_throwsException() throws ExecutionException, InterruptedException {
-        // Given
-        DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
-
         // When
         doThrow(RuntimeException.class).when(trackingServMock).process(any(DispatchPreparing.class));
 
