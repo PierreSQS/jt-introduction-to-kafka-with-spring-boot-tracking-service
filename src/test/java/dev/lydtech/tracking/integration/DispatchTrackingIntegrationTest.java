@@ -19,7 +19,11 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
 @SpringBootTest(classes = {TrackingConfiguration.class})
@@ -59,6 +63,10 @@ class DispatchTrackingIntegrationTest {
     void testDispatchTrackingFlow() throws Exception{
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
         send(DISPATCH_TRACKING_TOPIC,dispatchPreparing);
+
+        // WAIT FOR KAFKA LISTENER COUNTER TO BE INCREASED TO 1
+        await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(kafkaTestListener.trackingStatusCounter::get, equalTo(1));
     }
 
     private void send(String topic, Object payloadData) throws Exception{
