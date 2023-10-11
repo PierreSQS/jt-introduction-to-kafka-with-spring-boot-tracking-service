@@ -12,9 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,6 +41,12 @@ class DispatchTrackingIntegrationTest {
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    @Autowired
+    private KafkaListenerEndpointRegistry registry;
 
     @Autowired
     private KafkaTestListener kafkaTestListener;
@@ -64,6 +73,11 @@ class DispatchTrackingIntegrationTest {
     void setUp() {
         // initialize trackingStatusCounter
         kafkaTestListener.trackingStatusCounter.set(0);
+
+        // WAIT UNTIL THE PARTITIONS ARE ASSIGNED.
+        registry.getListenerContainers().forEach(container ->
+                ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic()));
+
     }
 
     @Test
