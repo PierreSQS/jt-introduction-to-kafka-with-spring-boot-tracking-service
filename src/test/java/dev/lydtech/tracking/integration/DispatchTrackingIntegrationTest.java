@@ -5,6 +5,7 @@ import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import dev.lydtech.tracking.util.TestEventData;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,6 +58,12 @@ class DispatchTrackingIntegrationTest {
             log.info("Receive TrackingStatusUpdated Payload: {}",trackingStatusUpdated);
             trackingStatusCounter.incrementAndGet();
         }
+    }
+
+    @BeforeEach
+    void setUp() {
+        // initialize trackingStatusCounter
+        kafkaTestListener.trackingStatusCounter.set(0);
     }
 
     @Test
