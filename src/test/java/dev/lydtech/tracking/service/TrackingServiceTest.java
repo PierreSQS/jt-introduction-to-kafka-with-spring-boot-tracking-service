@@ -1,5 +1,6 @@
 package dev.lydtech.tracking.service;
 
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import dev.lydtech.tracking.util.TestEventData;
@@ -30,7 +31,7 @@ class TrackingServiceTest {
     }
 
     @Test
-    void process_Success() throws ExecutionException, InterruptedException {
+    void process_DispatchPreparing_Success() throws ExecutionException, InterruptedException {
         given(kafkaTemplateMock.send(anyString(),any(TrackingStatusUpdated.class))).willReturn(mock());
 
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
@@ -40,7 +41,7 @@ class TrackingServiceTest {
     }
 
     @Test
-    void process_ThrowsException() {
+    void process_DispatchPreparing_ThrowsException() {
         // Given
         DispatchPreparing dispatchPreparing = TestEventData.buildDispatchPreparingEvent(UUID.randomUUID());
 
@@ -65,5 +66,31 @@ class TrackingServiceTest {
 
         // Verify 2 Calls because of the calls above
         verify(kafkaTemplateMock, times(2)).send(eq(TrackingService.TRACKING_STATUS_TOPIC),any());
+    }
+
+    @Test
+    void process_DispatchCompleted_Success() throws ExecutionException, InterruptedException {
+        DispatchCompleted dispatchCompleted = TestEventData.buildDispatchCompletedEvent(UUID.randomUUID());
+
+        given(kafkaTemplateMock.send(eq(TrackingService.TRACKING_STATUS_TOPIC), any(TrackingStatusUpdated.class)))
+                .willReturn(mock());
+
+        trackingService.process(dispatchCompleted);
+
+        verify(kafkaTemplateMock).send(eq(TrackingService.TRACKING_STATUS_TOPIC), any(TrackingStatusUpdated.class));
+    }
+
+    @Test
+    void process_DispatchCompleted_ThrowsException() {
+        DispatchCompleted dispatchCompleted = TestEventData.buildDispatchCompletedEvent(UUID.randomUUID());
+
+        doThrow(new RuntimeException(TRACKING_PROCESS_FAILURE)).when(kafkaTemplateMock)
+                .send(eq(TrackingService.TRACKING_STATUS_TOPIC), any(TrackingStatusUpdated.class));
+
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> trackingService.process(dispatchCompleted))
+                .withMessage(TRACKING_PROCESS_FAILURE);
+
+        verify(kafkaTemplateMock).send(eq(TrackingService.TRACKING_STATUS_TOPIC), any(TrackingStatusUpdated.class));
     }
 }
