@@ -13,5 +13,5 @@ import java.util.UUID;
 @Builder
 public class TrackingStatusUpdated {
     private UUID orderId;
-    private Status status;
+    private TrackingStatus trackingStatus;
 }

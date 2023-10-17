@@ -2,7 +2,7 @@ package dev.lydtech.tracking.service;
 
 import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
-import dev.lydtech.dispatch.message.Status;
+import dev.lydtech.dispatch.message.TrackingStatus;
 import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,7 +23,7 @@ public class TrackingService {
                 TrackingStatusUpdated
                         .builder()
                         .orderId(dispatchPreparing.getOrderId())
-                        .status(Status.PREPARING)
+                        .trackingStatus(TrackingStatus.PREPARING)
                         .build();
 
         kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated).get();
@@ -34,7 +34,7 @@ public class TrackingService {
                 TrackingStatusUpdated
                         .builder()
                         .orderId(dispatchCompleted.getOrderID())
-                        .status(Status.COMPLETED)
+                        .trackingStatus(TrackingStatus.COMPLETED)
                         .build();
 
         kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated).get();
