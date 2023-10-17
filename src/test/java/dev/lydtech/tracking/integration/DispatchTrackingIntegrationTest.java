@@ -1,6 +1,7 @@
 package dev.lydtech.tracking.integration;
 
 import dev.lydtech.configuration.TrackingConfiguration;
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.TrackingStatusUpdated;
 import dev.lydtech.tracking.util.TestEventData;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,6 +24,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,13 +62,21 @@ class DispatchTrackingIntegrationTest {
         }
     }
 
+    @KafkaListener(groupId = "KafkaIntegrationTest",topics = {DISPATCH_TRACKING_TOPIC, TRACKING_STATUS_TOPIC})
     public static class KafkaTestListener {
         AtomicInteger trackingStatusCounter = new AtomicInteger(0);
+        AtomicInteger dispatchCompletedCounter = new AtomicInteger(0);
 
-        @KafkaListener(groupId = "KafkaIntegrationTest",topics = {TRACKING_STATUS_TOPIC})
+        @KafkaHandler
         void receiveTrackingStatus(@Payload TrackingStatusUpdated trackingStatusUpdated) {
             log.info("Receive TrackingStatusUpdated Payload: {}",trackingStatusUpdated);
             trackingStatusCounter.incrementAndGet();
+        }
+
+        @KafkaHandler
+        void receiveDispatchCompletedStatus(@Payload DispatchCompleted dispatchCompleted) {
+            log.info("Receive DispatchCompleted Payload: {}",dispatchCompleted);
+            dispatchCompletedCounter.incrementAndGet();
         }
     }
 
@@ -74,9 +85,14 @@ class DispatchTrackingIntegrationTest {
         // initialize trackingStatusCounter
         kafkaTestListener.trackingStatusCounter.set(0);
 
+        // initialize dispatchCompletedCounter
+        kafkaTestListener.dispatchCompletedCounter.set(0);
+
         // WAIT UNTIL THE PARTITIONS ARE ASSIGNED.
         registry.getListenerContainers().forEach(container ->
-                ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic()));
+                ContainerTestUtils.waitForAssignment(container,
+                        Objects.requireNonNull(container.getContainerProperties().getTopics()).length *
+                                embeddedKafkaBroker.getPartitionsPerTopic()));
 
     }
 
@@ -88,6 +104,16 @@ class DispatchTrackingIntegrationTest {
         // WAIT FOR KAFKA LISTENER COUNTER TO BE INCREASED TO 1
         await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
                 .until(kafkaTestListener.trackingStatusCounter::get, equalTo(1));
+    }
+
+    @Test
+    void testDispatchCompletedFlow() throws Exception{
+        DispatchCompleted dispatchCompleted = TestEventData.buildDispatchCompletedEvent(UUID.randomUUID());
+        send(DISPATCH_TRACKING_TOPIC,dispatchCompleted);
+
+        // WAIT FOR KAFKA LISTENER COUNTER TO BE INCREASED TO 1
+        await().atMost(3, TimeUnit.SECONDS).pollDelay(100, TimeUnit.MILLISECONDS)
+                .until(kafkaTestListener.dispatchCompletedCounter::get, equalTo(1));
     }
 
     private void send(String topic, Object payloadData) throws Exception{
