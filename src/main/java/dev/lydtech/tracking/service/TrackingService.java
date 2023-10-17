@@ -1,5 +1,6 @@
 package dev.lydtech.tracking.service;
 
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPreparing;
 import dev.lydtech.dispatch.message.Status;
 import dev.lydtech.dispatch.message.TrackingStatusUpdated;
@@ -23,6 +24,17 @@ public class TrackingService {
                         .builder()
                         .orderId(dispatchPreparing.getOrderId())
                         .status(Status.PREPARING)
+                        .build();
+
+        kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated).get();
+
+    }
+    public void process(DispatchCompleted dispatchCompleted) throws ExecutionException, InterruptedException {
+        TrackingStatusUpdated trackingStatusUpdated =
+                TrackingStatusUpdated
+                        .builder()
+                        .orderId(dispatchCompleted.getOrderID())
+                        .status(Status.COMPLETED)
                         .build();
 
         kafkaTemplate.send(TRACKING_STATUS_TOPIC, trackingStatusUpdated).get();
