@@ -35,9 +35,9 @@ import static org.hamcrest.Matchers.equalTo;
 @EmbeddedKafka(controlledShutdown = true)
 class DispatchTrackingIntegrationTest {
 
-    private final static String DISPATCH_TRACKING_TOPIC = "dispatch.tracking";
+    private static final String DISPATCH_TRACKING_TOPIC = "dispatch.tracking";
 
-    private final static String TRACKING_STATUS_TOPIC = "tracking.status";
+    private static final String TRACKING_STATUS_TOPIC = "tracking.status";
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
@@ -64,8 +64,9 @@ class DispatchTrackingIntegrationTest {
 
         @KafkaListener(groupId = "KafkaIntegrationTest",topics = {TRACKING_STATUS_TOPIC})
         void receiveTrackingStatus(@Payload TrackingStatusUpdated trackingStatusUpdated) {
-            log.info("Receive TrackingStatusUpdated Payload: {}",trackingStatusUpdated);
+            log.info("Received TrackingStatusUpdated Payload: {}",trackingStatusUpdated);
             trackingStatusCounter.incrementAndGet();
+            log.info("Tracking Status successfully updated for Order ID: {}", trackingStatusUpdated.getOrderId());
         }
     }
 

@@ -21,10 +21,11 @@ public class DispatchTrackingHandler {
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void listen (DispatchPreparing payload) {
-        log.info("Received Tracking Payload: {}",payload);
+        log.info("Received DispatchPreparing Payload: {}",payload);
 
         try {
             trackingService.process(payload);
+            log.info("DispatchPreparing processed successfully: {}", payload);
         } catch (Exception e) {
             log.error("Tracking Process failure: ",e);
             /* Clean up whatever needs to be handled before interrupting  */
