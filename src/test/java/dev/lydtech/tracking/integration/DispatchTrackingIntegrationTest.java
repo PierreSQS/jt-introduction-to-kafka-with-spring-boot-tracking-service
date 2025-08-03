@@ -40,13 +40,13 @@ class DispatchTrackingIntegrationTest {
     private static final String TRACKING_STATUS_TOPIC = "tracking.status";
 
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
+    EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
-    private KafkaListenerEndpointRegistry registry;
+    KafkaListenerEndpointRegistry registry;
 
     @Autowired
     private KafkaTestListener kafkaTestListener;
