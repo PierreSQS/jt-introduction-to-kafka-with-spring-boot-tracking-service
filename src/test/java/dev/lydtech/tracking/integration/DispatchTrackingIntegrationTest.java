@@ -32,7 +32,7 @@ import static org.hamcrest.Matchers.equalTo;
 @Slf4j
 @SpringBootTest(classes = {TrackingConfiguration.class})
 @ActiveProfiles("test")
-@EmbeddedKafka(controlledShutdown = true)
+@EmbeddedKafka(kraft = true, controlledShutdown = true)
 class DispatchTrackingIntegrationTest {
 
     private static final String DISPATCH_TRACKING_TOPIC = "dispatch.tracking";
